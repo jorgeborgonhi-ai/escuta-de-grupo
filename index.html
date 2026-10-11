@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A sua IA lendo o grupo do cliente</title>
+<meta name="description" content="Guia do Jorge Borgonhi pra sua IA montar com você um número de WhatsApp que guarda as mensagens dos grupos com cliente num banco de dados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grafite: #111317;
+    --verde: #7ED321;
+    --verde-noite: #1F4305;
+    --creme: #F2EFE8;
+    --areia: #E2DED5;
+    --cinza: #6E6B64;
+    --fundo: var(--creme);
+    --texto: var(--grafite);
+    --cartao: #FFFFFF;
+    --linha: var(--areia);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: var(--grafite);
+      --texto: #F2EFE8;
+      --cartao: #1B1E23;
+      --linha: #2A2E35;
+      --cinza: #9A978F;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--texto);
+    font: 400 17px/1.55 "Space Grotesk", system-ui, sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 32px 16px 56px; }
+  .rotulo {
+    font: 700 12px/1 "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--cinza);
+  }
+  h1 { font-size: clamp(30px, 8vw, 44px); line-height: 1.08; margin: 14px 0 16px; letter-spacing: -.02em; }
+  h1 em { font: italic 400 1.08em/1 "Instrument Serif", serif; color: var(--verde-noite); }
+  @media (prefers-color-scheme: dark) { h1 em { color: var(--verde); } }
+  h2 { font-size: 21px; margin: 40px 0 12px; }
+  p { margin: 0 0 12px; }
+  .frase {
+    border-left: 4px solid var(--verde);
+    padding: 4px 0 4px 14px;
+    margin: 20px 0;
+    font-weight: 500;
+  }
+  .copiar {
+    display: block;
+    width: 100%;
+    margin: 28px 0 10px;
+    padding: 18px 20px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--verde);
+    color: var(--grafite);
+    font: 700 18px/1.2 "Space Grotesk", sans-serif;
+    cursor: pointer;
+  }
+  .copiar:active { transform: scale(.99); }
+  .aviso-copia { min-height: 24px; font-size: 15px; color: var(--cinza); text-align: center; }
+  ol, ul { padding-left: 22px; margin: 0; }
+  li { margin-bottom: 8px; }
+  .cuidados { display: grid; gap: 10px; }
+  .cuidado {
+    background: var(--cartao);
+    border: 1px solid var(--linha);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .cuidado strong { display: block; margin-bottom: 4px; }
+  a { color: inherit; text-decoration-color: var(--verde); text-underline-offset: 3px; }
+  code { font: 400 14px "JetBrains Mono", monospace; background: var(--cartao); border: 1px solid var(--linha); border-radius: 6px; padding: 1px 5px; }
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--linha); font-size: 15px; color: var(--cinza); }
+  .fora { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; opacity: 0; }
+</style>
+</head>
+<body>
+<main>
+  <div class="rotulo">Guia · @jorgeborgonhi</div>
+  <h1>A sua IA lendo o <em>grupo</em> do cliente</h1>
+
+  <p>Um número de WhatsApp fica nos grupos com cliente e guarda as mensagens num banco de dados. Com
+  isso montado, a sua IA chega sabendo o que o cliente pediu, o que foi combinado e o que ficou
+  pendente, sem você copiar conversa nenhuma.</p>
+  <p class="frase">Aí é só chegar pra ela e falar: "Meu cliente pediu isso no grupo tal. Vamos resolver."</p>
+  <p>Você não precisa saber programar. Quem faz a parte técnica é a sua IA, e você vai clicando e
+  colando o que ela pedir.</p>
+
+  <button class="copiar" id="copiar" type="button">Copiar o guia pra minha IA</button>
+  <div class="aviso-copia" id="aviso" role="status" aria-live="polite"></div>
+
+  <h2>Como usar</h2>
+  <ol>
+    <li>Toque no botão verde aí em cima. O guia inteiro vai pra área de transferência.</li>
+    <li>Abra uma conversa nova com a sua IA (Claude, ChatGPT ou Codex), cole e mande.</li>
+    <li>Ela pergunta o que você já tem e te leva etapa por etapa. Parou no meio? Cola de novo outro
+    dia e diz onde parou.</li>
+  </ol>
+  <p style="margin-top:12px">A montagem é no computador. Se você está no celular, copie aqui e mande
+  pra você mesmo, ou abra esta página no computador depois.</p>
+
+  <h2>O que você vai precisar</h2>
+  <ul>
+    <li><strong>Um servidor</strong> (um computador alugado que fica ligado o tempo todo). O caminho
+    mais fácil é a VPS da Hostinger, que instala tudo com um clique.</li>
+    <li><strong>Um chip só pra isso</strong>, com WhatsApp num celular.</li>
+    <li><strong>Uma conta no Supabase</strong>, que é o banco de dados. O plano gratuito dá pra começar.</li>
+    <li><strong>Uma IA que consiga se ligar ao banco.</strong> O guia confere isso logo no começo.</li>
+    <li>Umas duas ou três horas, com calma.</li>
+  </ul>
+
+  <h2>Três cuidados antes de começar</h2>
+  <div class="cuidados">
+    <div class="cuidado"><strong>Nunca use o seu número principal.</strong> Esse número não usa a
+    conexão oficial do WhatsApp pra empresas, ele entra do mesmo jeito que o WhatsApp Web, e pode ser
+    bloqueado. É um chip separado, que só escuta.</div>
+    <div class="cuidado"><strong>Avise o grupo que ele tá lá.</strong> Guardar mensagem de outras
+    pessoas pede transparência (é a LGPD). O guia traz a mensagem pronta e mostra como tirar do
+    registro quem pedir.</div>
+    <div class="cuidado"><strong>Chave secreta não vai pra conversa.</strong> Senha e chave você cola
+    direto no painel de cada sistema, nunca no chat da IA. A IA lê o banco com um acesso só de
+    leitura.</div>
+  </div>
+
+  <h2>Usa o Claude Code?</h2>
+  <p>Dá pra instalar como skill: baixe a pasta <code>escuta-de-grupo</code> do
+  <a href="https://github.com/jorgeborgonhi-ai/escuta-de-grupo">repositório</a>, coloque dentro de <code>~/.claude/skills/</code> e peça
+  "monta a escuta de grupo comigo".</p>
+
+  <footer>
+    Guia de Jorge Borgonhi. Os arquivos estão no <a href="https://github.com/jorgeborgonhi-ai/escuta-de-grupo">GitHub</a>.
+    Me conta como ficou o seu no Instagram: <a href="https://instagram.com/jorgeborgonhi">@jorgeborgonhi</a>.
+  </footer>
+</main>
+
+<!-- guia -->
+<textarea id="guia" class="fora" readonly tabindex="-1" aria-hidden="true"># Guia: a IA que lê os grupos de WhatsApp dos seus clientes
+
+&gt; **Para a IA que recebeu este texto.** Quem colou este guia quer montar um sistema em que um número
+&gt; de WhatsApp fica nos grupos com os clientes, as mensagens vão para um banco de dados e você passa a
+&gt; ler esse banco. Você vai conduzir a montagem com a pessoa, etapa por etapa. Leia o guia inteiro
+&gt; antes da primeira resposta e comece pela Etapa 0. Converse em português do Brasil.
+
+Guia de Jorge Borgonhi (@jorgeborgonhi). Conferido em outubro de 2026 com a Evolution API 2.3.7 e o
+Supabase da mesma época. Os arquivos citados aqui também estão em https://github.com/jorgeborgonhi-ai/escuta-de-grupo.
+
+## O que vamos montar
+
+```
+Grupo de WhatsApp com o cliente
+   │   um número só para escutar, adicionado ao grupo
+   ▼
+Evolution API, no servidor da pessoa        lê o WhatsApp do número, do jeito que o WhatsApp Web lê
+   │   avisa cada mensagem nova (webhook), com um segredo
+   ▼
+Função "receber-mensagem", no Supabase      confere o segredo e guarda só mensagem de grupo
+   ▼
+Tabelas "mensagens" e "grupos", no Supabase
+   ▲
+   │   acesso só de leitura
+Você, a IA da pessoa, com um arquivo de instruções que ensina a ler as conversas
+```
+
+## Palavras para traduzir
+
+Na primeira vez que cada uma aparecer, explique à pessoa com estas palavras (ou melhores). Termo novo
+que surgir na conversa, traduza também.
+
+| Termo | Em palavras simples |
+|---|---|
+| Servidor, VPS | Um computador alugado na internet, ligado o tempo todo. Hospedagem de site não é VPS e não serve aqui |
+| Evolution API | Programa gratuito e de código aberto que conecta um número de WhatsApp a outros sistemas. Tem um painel no navegador, o "manager" |
+| Instância | Cada número conectado na Evolution |
+| Baileys | O tipo de conexão da Evolution que imita o WhatsApp Web |
+| PostgreSQL, Redis | Peças que a Evolution usa por dentro (o banco e a memória rápida dela). Vêm junto na instalação, e a pessoa não mexe nelas |
+| Variável | Uma configuração do aplicativo, com nome e valor (a chave da Evolution é uma delas) |
+| Firewall | A portaria do servidor: decide quais portas ficam abertas |
+| Docker, Gerenciador Docker | O jeito de instalar programas prontos no servidor. Na Hostinger, é a tela onde se instala a Evolution |
+| Endereço, IP, porta | Onde o painel da Evolution abre: o IP é o "número da casa" do servidor, a porta é a "porta de entrada" do programa (ex.: `http://203.0.113.10:8080`) |
+| http, https | Com o "s", a conexão é criptografada; sem o "s", o que passa por ela pode ser lido no caminho |
+| Supabase | Banco de dados na nuvem, com plano gratuito. Quando este guia diz "o banco", é ele (a Evolution tem um banco próprio dentro do servidor, que ela mesma cuida) |
+| SQL Editor | Tela do Supabase onde se cola uma instrução para o banco e clica em Run |
+| Table Editor | Tela do Supabase que mostra as tabelas como uma planilha |
+| Função (Edge Function) | Um pedaço de código que roda no Supabase quando chega um aviso. "Deploy" é publicar a função |
+| Secrets | O cofre de segredos da função: cada segredo tem um nome (Key) e um valor (Value) |
+| Logs | O histórico de cada chamada que a função recebeu, com o resultado |
+| JWT | Uma verificação padrão do Supabase. Aqui ela fica desligada, porque quem confere quem pode entrar é o segredo do webhook |
+| Webhook | Um aviso automático que um sistema manda para outro a cada novidade |
+| Terminal | Uma janela de texto do servidor onde se cola um comando e aperta Enter |
+| Conector (MCP) | A ligação que deixa uma IA consultar outro sistema |
+| Id do projeto | O código do projeto no Supabase. Aparece no endereço do painel, depois de `/project/` |
+| Organização | A "empresa" dentro da conta do Supabase, onde ficam os projetos |
+
+## Como você conduz
+
+1. **Uma etapa por vez, na ordem.** Abra cada etapa dizendo em uma frase o que ela faz e por quê.
+2. **Pergunte antes o que a pessoa já tem.** O que já existe, você confere e aproveita.
+3. **Clique a clique.** Diga o nome do botão, onde ele fica e o que colar. A pessoa faz e conta o que
+   apareceu. Peça print sempre que a tela importar, e **antes de pedir print de tela que mostra chave
+   ou segredo, peça para ela cobrir ou cortar esse pedaço.**
+4. **Referência se entrega inteira.** Quando uma etapa manda colar uma Referência (fim deste guia),
+   mostre o conteúdo exatamente como está, inteiro, num bloco só, sem resumir e sem "melhorar" nada.
+   Se a pessoa preferir, ela copia direto de https://github.com/jorgeborgonhi-ai/escuta-de-grupo.
+5. **Cada etapa termina na conferência dela.** Só avance com a conferência feita. Se falhar, resolva
+   antes, pela seção "Quando algo dá errado".
+6. **A tela manda.** Painéis mudam de lugar com o tempo. Quando o que a pessoa vê não bate com este
+   guia, guie pelo print. Se você consegue abrir páginas da internet, confira na documentação oficial
+   (links no fim). Se nem o print nem a documentação resolvem, diga isso com clareza, em vez de
+   inventar um botão.
+7. **A IA que conduz pode não ser a que lê.** A montagem pode seguir nesta conversa; só as Etapas 6 e
+   7 acontecem na IA que vai ler os grupos no dia a dia, se for outra.
+8. **Se você roda comandos no computador da pessoa** (Claude Code, Codex), faça você mesmo as
+   conferências que não levam chave. Peça OK antes de qualquer coisa que mude o servidor, o banco ou o
+   WhatsApp.
+9. **Ao fechar cada etapa, mostre o placar:** o que está feito e o que falta. Assim a pessoa retoma
+   outro dia colando o guia de novo e dizendo onde parou.
+
+## Os três cuidados
+
+Apresente os três antes da Etapa 1, em palavras simples, e confirme que a pessoa concorda.
+
+1. **Número separado, sempre.** A Evolution conecta o número do mesmo jeito que o WhatsApp Web, fora
+   da API oficial do WhatsApp para empresas, e o WhatsApp pode bloquear um número conectado assim. Por
+   isso é um chip só para isso, nunca o número principal nem o do atendimento. Esse número só escuta:
+   não manda mensagem, não responde sozinho, só entra em grupo de trabalho.
+   - **Se a pessoa quiser usar o número principal ou o do atendimento, não siga.** Explique o que
+     acontece se o WhatsApp bloquear: some o atendimento e todos os grupos daquele número de uma vez.
+     Um chip pré-pago resolve, e ele pode morar no mesmo celular da pessoa: um app com o número dela,
+     o WhatsApp Business com o número de escuta (se o celular aceitar dois chips ou chip virtual).
+   - **Se ela só tem o chip:** põe no celular, instala o WhatsApp (ou o WhatsApp Business) e ativa com
+     o código que chega por SMS. Chip pré-pago parado há muito tempo pode precisar de recarga para
+     voltar a funcionar.
+2. **O grupo fica sabendo.** Guardar mensagem de outras pessoas é tratar dado pessoal, e a LGPD (a lei
+   brasileira de proteção de dados) pede transparência. Quando o número entrar num grupo de cliente, a pessoa avisa na hora quem ele é e que
+   uma IA ajuda a ler (texto pronto na Etapa 8). A função ignora conversa privada com o número; quem
+   pedir para não ser registrado sai do registro (passo a passo na Etapa 8); e quando o trabalho com o
+   cliente acabar, o número sai do grupo.
+3. **Chave secreta fica fora da conversa.** A chave da Evolution, a senha do banco e o segredo do
+   webhook a pessoa cola direto no campo onde cada um é usado e guarda num gerenciador de senhas (o
+   Bitwarden é gratuito e funciona no computador e no celular; no Mac, o app Senhas também serve),
+   cada um numa anotação com nome claro: "Escuta: chave da Evolution", "Escuta: segredo do webhook",
+   "Escuta: senha root", "Escuta: senha do banco". Nunca neste chat, nunca em página da internet. Se ela
+   colar uma chave aqui por engano, avise na hora e siga "Uma chave vazou", em "Quando algo dá
+   errado". Você lê o banco com um acesso só de leitura que não usa chave nenhuma.
+
+## Etapa 0: o ponto de partida
+
+Pergunte, numa mensagem só:
+
+1. Qual IA você vai usar no dia a dia para ler os grupos (Claude no site ou no app, Claude Code,
+   ChatGPT, Codex)? Em qual plano?
+2. Você já tem um servidor (VPS)? Em qual empresa? Roda alguma outra coisa nele? (Hospedagem de site
+   não conta: precisa ser VPS.)
+3. A Evolution API já está instalada em algum lugar?
+4. Já tem conta no Supabase?
+5. Já tem o chip separado, com WhatsApp funcionando num celular?
+6. Você está num computador? (Quase tudo se faz no computador; o celular do número entra só para ler
+   o QR code.)
+
+Depois, **confira a Etapa 6 antes de construir qualquer coisa**: veja na tabela de lá se a IA e o
+plano da pessoa conseguem se ligar ao banco. Se não conseguem, diga agora e mostre o caminho que
+funciona, para ninguém montar tudo e travar no fim.
+
+Conte também o custo: a VPS é paga, e é uma assinatura separada da hospedagem de site, se a pessoa
+tiver uma. Confira na página da Hostinger o preço e o período antes de contratar (plano longo costuma
+ser cobrado de uma vez). A Evolution e o plano gratuito do Supabase não custam nada.
+
+**Conferência:** você sabe o que já existe, qual IA vai ler os grupos e que essa IA consegue se ligar
+ao banco.
+
+## Etapa 1: o servidor
+
+O caminho mais curto é a VPS da Hostinger, que tem a Evolution API como aplicativo de um clique, já
+com as peças de que ela precisa por dentro. Outra hospedagem serve, desde que rode Docker.
+
+1. **VPS nova:** na Hostinger, contrate uma VPS. O menor plano (lá chamado KVM 1) dá conta de um
+   número de escuta. Na instalação, escolha o aplicativo **Evolution API**. A Hostinger pede uma senha para o
+   servidor (a senha "root"): a pessoa gera no gerenciador de senhas e guarda.
+2. **VPS que já existe:** pergunte o que roda nela. **Nunca reinstale nem troque o sistema da VPS**:
+   isso apaga tudo o que está lá. A Evolution entra ao lado, pelo catálogo do **Gerenciador Docker**
+   da própria VPS. Se ninguém sabe o que roda lá ou não tem as senhas, uma VPS nova pequena é o
+   caminho mais seguro.
+3. **A chave da Evolution** (a variável AUTHENTICATION_API_KEY): se a instalação pedir, a pessoa gera
+   no gerador de senha do gerenciador uma senha de 32 caracteres ou mais, só letras e números
+   (desligue os símbolos), cola lá e guarda. Se
+   a instalação gerar a chave sozinha, ela copia de onde a tela mostrar e guarda.
+4. **O endereço:** o IP aparece na página da VPS, no painel da Hostinger; a porta aparece no aplicativo
+   da Evolution, na lista do Gerenciador Docker (peça print se a pessoa não achar). O endereço é
+   `http://&lt;ip&gt;:&lt;porta&gt;`.
+
+**Endereço com `http://` sem o "s":** funciona, mas a chave da Evolution viaja sem criptografia entre
+o computador da pessoa e o servidor. Dá para começar assim. Depois que tudo estiver rodando, se a
+pessoa quiser, você guia a troca para `https`, que pede um domínio apontado para o servidor e um
+certificado. Não é obrigatório para funcionar.
+
+**Conferência:** a Hostinger mostra o aplicativo Evolution API rodando, e a pessoa tem o endereço, a
+chave e a senha root guardados.
+
+## Etapa 2: a Evolution API
+
+1. Abra no navegador o endereço da Etapa 1 com `/manager` no fim: `http://&lt;ip&gt;:&lt;porta&gt;/manager`.
+2. O painel pede a URL do servidor (o endereço, sem o `/manager`) e a chave da API global (a chave da
+   Etapa 1).
+3. Em versões mais novas (2.4 em diante), o primeiro acesso pede a ativação de uma licença gratuita:
+   siga a tela; se pedir cadastro, a pessoa usa o e-mail dela.
+
+Se o painel não abrir: confira o endereço e a porta; confira na Hostinger se o aplicativo está
+rodando; e veja se o firewall da VPS (no painel da Hostinger) deixa a porta aberta.
+
+**Conferência:** o painel abre e mostra a lista de instâncias (vazia, se for a primeira vez).
+
+## Etapa 3: o número conectado
+
+1. No painel, crie uma instância nova. Nome: `escuta` (minúsculo, sem espaço nem acento; o nome entra
+   em comando mais à frente). Integração: **Baileys** (WHATSAPP-BAILEYS). Se o formulário tiver o
+   campo Número, pode deixar em branco.
+2. **Antes de gerar o QR**, a pessoa deixa o celular do número de escuta na mão, com o WhatsApp aberto
+   em Configurações → **Aparelhos conectados** → **Conectar um aparelho**.
+3. Clique em **Gerar QR Code** e leia na hora, pela tela de Conectar um aparelho do WhatsApp (a
+   câmera comum do celular não serve). O QR vence em menos de um minuto; vencido, clique de novo em
+   Gerar QR Code. Se o celular disser que não foi possível conectar, tente com um QR novo; depois de
+   três tentativas, reinicie a instância no painel e tente outra vez.
+4. Abra as configurações da instância e confira que **Ignorar grupos** está desligado (salve, se
+   mexer). Ligado, a Evolution descarta justamente as mensagens de grupo.
+
+Avise: o celular do número pode ficar guardado, mas precisa ser ligado e pegar internet pelo menos uma
+vez a cada dez dias. Com umas duas semanas sem uso, o WhatsApp desconecta os aparelhos ligados.
+
+Se um dia a instância for apagada e criada de novo, refaça a Etapa 5 (o aviso fica preso à instância).
+
+**Conferência:** a instância `escuta` aparece como conectada, com o número certo.
+
+## Etapa 4: o banco no Supabase
+
+1. **Conta e projeto.** Em supabase.com, crie a conta e um projeto novo **só para este sistema**
+   (nome sugerido: `escuta-de-grupo`, região São Paulo). Projeto próprio importa: o acesso de leitura
+   da Etapa 6 enxerga o projeto inteiro, então nele só mora a escuta. A senha do banco que o Supabase
+   pede: gere pelo botão do próprio Supabase e guarde no gerenciador de senhas.
+2. **As tabelas.** No menu da esquerda, **SQL Editor**: cole o conteúdo da Referência A inteiro e
+   clique em **Run**. Isso cria as tabelas `mensagens`, `grupos` e `nao_registrar`, e a visão
+   `conversas` (a conversa pronta para ler), com a porta trancada: só a função escreve, e ninguém de
+   fora lê. Tem que aparecer "Success".
+3. **O segredo do webhook.** Ainda no SQL Editor, apague o que estiver lá, cole e rode:
+
+   ```sql
+   select replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '') as segredo;
+   ```
+
+   Aparece uma senha de 64 letras e números, gerada ali dentro. A pessoa clica na célula do resultado,
+   copia e guarda no gerenciador de senhas, sem espaço antes nem depois. Ela vai em dois lugares: no Supabase (passo 5) e na
+   Evolution (Etapa 5). Não peça print dessa tela.
+4. **A função.** Menu **Edge Functions** → **Deploy a new function** → **Via Editor**. Nome:
+   `receber-mensagem` (exatamente assim). Apague o código de exemplo, cole o da Referência B inteiro e
+   clique em **Deploy function**.
+5. **O segredo da função.** Em **Edge Functions** → **Secrets**, crie um com Key `WEBHOOK_SECRET` e
+   Value igual ao segredo do passo 3, e salve.
+   - Opcional, só se o endereço da Evolution começa com `https://`: crie também `EVOLUTION_URL` (o
+     endereço, sem o `/manager`) e `EVOLUTION_API_KEY` (a chave da Evolution). Com eles, a função
+     busca o nome de grupo antigo e de grupo renomeado. Com endereço `http://` ela não usa a chave,
+     para a chave não viajar aberta.
+6. **Destrave a porta do aviso.** Abra a função → aba **Settings** → em **Function configuration**,
+   desligue **Verify JWT with legacy secret** → **Save changes**. Sem isso o Supabase barra o aviso da
+   Evolution antes de a função rodar. A tranca continua: quem não manda o segredo certo leva recusa.
+   Se a pessoa não achar o interruptor, peça print da página da função e procure qualquer opção com
+   "JWT" no nome, em qualquer aba: o nome muda de tempos em tempos. Se ainda assim não achar, confira
+   na documentação (https://supabase.com/docs/guides/functions/function-configuration) onde ele está
+   hoje.
+
+**Conferência:** abra no navegador `https://&lt;id-do-projeto&gt;.supabase.co/functions/v1/receber-mensagem`.
+Tem que aparecer `{"erro":"use POST"}`. Se aparecer um erro que fala de autorização ou de JWT, a
+verificação do passo 6 continua ligada.
+
+## Etapa 5: o aviso da Evolution para o Supabase
+
+O painel da Evolution configura webhook, mas não tem campo para o segredo. Por isso este passo é um
+comando. Ele pergunta a chave e o segredo sem mostrar na tela e sem guardar no histórico, e responde
+só "PRONTO" ou "DEU ERRO".
+
+1. **Abra o terminal.** Na Hostinger: página da VPS → botão **Terminal** (abre no navegador). Se pedir
+   usuário e senha: `root` e a senha root da Etapa 1. Sem a senha, a página da VPS tem a opção de
+   redefinir a senha root (se a VPS roda coisa de outra pessoa, combine antes). Em outra hospedagem,
+   o acesso SSH. Se o terminal do navegador não aceitar colar, use o do computador: no Mac, abra o app
+   Terminal; no Windows, abra o PowerShell. Nos dois, digite `ssh root@&lt;ip&gt;`, aperte Enter, responda
+   `yes` se perguntar e cole a senha root. Pronto, você está dentro do servidor.
+2. **Você monta o comando**, trocando só duas coisas, que não são segredo: `ENDERECO_DA_EVOLUTION`
+   (o endereço da Etapa 1, sem o `/manager` e sem barra no fim) e `ID_DO_PROJETO`. Entregue o comando
+   pronto, num bloco só, para a pessoa copiar pelo botão de copiar (copiar e colar pelo bloco de notas
+   ou pelo Word troca as aspas e quebra o comando).
+
+   ```bash
+   printf 'Chave da Evolution: '; read -rs EVO_CHAVE; echo; printf 'Segredo do webhook: '; read -rs SEGREDO; echo; RESPOSTA=$(curl -sS -X POST "ENDERECO_DA_EVOLUTION/webhook/set/escuta" -H "apikey: $EVO_CHAVE" -H "Content-Type: application/json" -d "{\"webhook\":{\"enabled\":true,\"url\":\"https://ID_DO_PROJETO.supabase.co/functions/v1/receber-mensagem\",\"headers\":{\"x-webhook-secret\":\"$SEGREDO\"},\"byEvents\":false,\"base64\":false,\"events\":[\"MESSAGES_UPSERT\",\"GROUPS_UPSERT\"]}}" 2&gt;&amp;1); unset EVO_CHAVE SEGREDO; if echo "$RESPOSTA" | grep -Eq '"enabled": ?true'; then echo "PRONTO: o aviso está ligado"; else echo "DEU ERRO:"; echo "$RESPOSTA" | sed -E 's/"x-webhook-secret": ?"[^"]*"/"x-webhook-secret":"***"/' | head -c 400; echo; fi
+   ```
+
+3. **A pessoa cola no terminal e aperta Enter.** No terminal do navegador, colar costuma ser
+   Ctrl+Shift+V ou o botão direito do mouse → Colar. O terminal pergunta a chave da Evolution: ela
+   cola (não aparece nada enquanto cola, é de propósito) e aperta Enter. Depois, o segredo do webhook,
+   do mesmo jeito.
+4. **A resposta:** "PRONTO" encerra o passo. "DEU ERRO" vem com o motivo, sem segredo nenhum, e pode
+   ser colado aqui:
+   - `401` ou `Unauthorized`: a chave da Evolution está errada (às vezes é só um espaço ou uma letra a
+     mais ao colar: copie de novo do gerenciador de senhas).
+   - `Failed to connect` ou `Could not resolve host`: o endereço está errado ou a Evolution está fora
+     do ar.
+   - Falando de instância que não existe: o nome da instância não é `escuta`.
+   - Qualquer outra mensagem: leia junto com a pessoa (ela vem sem segredo) e confira na documentação
+     da Evolution.
+
+Avise: depois disso, **não salve a tela de Webhook do painel da Evolution**, porque ela não tem o
+campo do segredo. Se alguém salvar e as mensagens pararem de chegar, rode o comando de novo.
+
+**Conferência, com um grupo de teste** (nada de cliente ainda):
+1. A pessoa salva o número de escuta nos contatos do celular dela.
+2. No WhatsApp dela (o pessoal, não o do número de escuta), ela cria um grupo "Teste escuta" com o
+   número de escuta dentro, e manda "teste".
+3. No Supabase, **Table Editor** → `mensagens` mostra a linha com "teste", e `grupos` mostra o grupo
+   "Teste escuta". Pode levar alguns segundos. Se o grupo aparecer sem nome, a escuta está funcionando
+   do mesmo jeito: siga "Grupo sem nome", em "Quando algo dá errado".
+
+Não apareceu? Siga "A mensagem de teste não aparece", em "Quando algo dá errado".
+
+## Etapa 6: você lendo o banco (só leitura)
+
+O caminho é o conector oficial do Supabase (MCP) em **modo só leitura**, preso a este projeto. A
+pessoa entra pela conta do Supabase dela, no navegador, e não cola chave nenhuma. No modo só leitura o
+Supabase usa um usuário do banco que consegue ler e não tem permissão nenhuma de escrever.
+
+O endereço do conector, com o id do projeto no lugar:
+
+```
+https://mcp.supabase.com/mcp?project_ref=&lt;id-do-projeto&gt;&amp;read_only=true
+```
+
+| IA da pessoa | Como ligar |
+|---|---|
+| **Claude** (site ou app) | Configurações → **Connectors** (Conectores) → **Add custom connector** → cole o endereço → conecte e autorize no Supabase, escolhendo a organização onde está o projeto. Funciona no plano gratuito (lá, um conector personalizado só) e nos pagos; no Team e no Enterprise, quem adiciona é o administrador. Use o conector **personalizado**, com o endereço acima: o conector "Supabase" pronto da lista não vem preso ao projeto nem em só leitura. Numa conversa, ligue o conector pelo botão de ferramentas da caixa de mensagem. |
+| **Claude Code** | No terminal, na pasta onde a pessoa vai trabalhar: `claude mcp add --transport http supabase "https://mcp.supabase.com/mcp?project_ref=&lt;id&gt;&amp;read_only=true"`. Depois, dentro do Claude Code, `/mcp` → supabase → **Authenticate**. As aspas são obrigatórias. |
+| **Codex** | `codex mcp add supabase --url "https://mcp.supabase.com/mcp?project_ref=&lt;id&gt;&amp;read_only=true"` e depois `codex mcp login supabase`. |
+| **ChatGPT** | Servidor MCP próprio entra pelo modo desenvolvedor, e a disponibilidade muda por plano. Peça um print de Configurações → Apps (ou Conectores) → configurações avançadas: se não houver modo desenvolvedor nem opção de adicionar servidor MCP próprio, o plano dela não tem. Aí o caminho mais curto é o Claude no plano gratuito, que lê os grupos enquanto a pessoa segue usando o ChatGPT para o resto. |
+
+Se a sua IA deixar, mantenha a confirmação antes de cada consulta nas primeiras vezes: a pessoa vê o
+que você está lendo.
+
+**Conferência**, em duas perguntas que a pessoa faz para a IA que vai ler:
+1. "Quantas mensagens tem na tabela mensagens?" A resposta bate com o Table Editor.
+2. "Tente criar uma tabela temporária chamada teste_escrita e me mostre a resposta do banco." A IA
+   tenta de verdade, e o banco tem que **recusar** com uma mensagem que fala em "read-only" (só
+   leitura). Se a IA se recusar a tentar, a pessoa explica que é um teste: recusa da própria IA não
+   vale como conferência. Se a tabela for criada, o modo só leitura não está ligado: refaça a ligação
+   com o `read_only=true` no endereço.
+
+## Etapa 7: ensinar você a ler as conversas
+
+A Referência C é o modelo do arquivo de instruções. Preencha com a pessoa o nome do projeto e o fuso
+(fica `America/Sao_Paulo` para quem está em Brasília, São Paulo, Rio e boa parte do país). Os nomes
+da equipe ficam para depois da Etapa 8, quando já existir conversa de cliente para consultar. Salve
+onde a IA dela lê sempre:
+
+| IA | Onde salvar |
+|---|---|
+| Claude (site ou app) | Crie um **Projeto**, cole nas instruções do projeto e use as conversas de cliente dentro dele |
+| ChatGPT | Crie um **Projeto** e cole nas instruções dele |
+| Claude Code | Arquivo `CLAUDE.md` na pasta de trabalho |
+| Codex | Arquivo `AGENTS.md` na pasta de trabalho |
+
+Se o plano da pessoa não tiver Projetos, ela cola as instruções no começo de cada conversa de cliente.
+
+**Conferência:** numa conversa nova, a pessoa pede "lista os grupos" e depois "o que foi dito no grupo
+Teste escuta?". A resposta traz o grupo certo, a data e quem disse.
+
+## Etapa 8: os grupos dos clientes
+
+Com tudo funcionando, o número de escuta entra nos grupos de trabalho. Quem adiciona é um
+administrador de cada grupo; se a pessoa não é administradora de algum, ela pede a quem é. **Logo que o
+número entrar, antes de qualquer outra conversa**, a pessoa manda o aviso (ajustando o jeito de falar):
+
+&gt; Pessoal, adicionei aqui o número [nome da empresa]. Ele registra as mensagens deste grupo, que a
+&gt; nossa equipe consulta com ajuda de IA pra organizar os pedidos e não deixar nada passar. Ele não
+&gt; manda mensagem. Se alguém preferir que as suas mensagens não fiquem registradas, é só me chamar.
+
+Depois, complete o arquivo de instruções com os nomes da equipe. Para ver quem fala nos grupos:
+`select autor_nome, count(*) from conversas group by autor_nome order by 2 desc;`
+
+O grupo de teste pode ser apagado do WhatsApp, e ele sai do banco com estes dois comandos, nesta
+ordem, que a pessoa roda no SQL Editor:
+`delete from public.mensagens where grupo_id in (select id from public.grupos where nome = 'Teste escuta');`
+`delete from public.grupos where nome = 'Teste escuta';`
+
+**Quando alguém pede para não ser registrado:** siga a seção "Quando alguém pedir para não ser
+registrado" da Referência C. Ela vale também no dia a dia, porque fica no arquivo de instruções.
+
+**Conferência:** cada grupo de cliente aparece em `grupos` com o nome certo, e a primeira mensagem
+depois da entrada já está em `mensagens`. Grupo sem nome: veja "Grupo sem nome", em "Quando algo dá
+errado".
+
+## Etapa 9: no dia a dia, e indo além
+
+O uso é este: **"Meu cliente pediu isso no grupo tal. Vamos resolver."** Você acha o grupo, lê a
+conversa, monta o quadro (pedido, combinado, pendente) e segue com a pessoa no trabalho. O banco
+guarda a partir do dia em que o número entrou; o que foi dito antes disso não está lá.
+
+Quando a pessoa quiser ir além, as próximas peças, uma de cada vez:
+
+- **Memória de cada cliente.** Um documento por cliente (objetivo, quem decide, combinados,
+  pendências, com data), guardado junto das instruções (no Projeto, ou numa pasta `clientes/` no
+  Claude Code e no Codex). No fim de cada conversa de trabalho, você propõe o que atualizar e a pessoa
+  aprova. No Claude e no ChatGPT, você escreve a atualização e ela cola no documento do cliente dentro
+  do Projeto; no Claude Code e no Codex, você mesmo atualiza o arquivo, com o OK dela. A conversa do
+  grupo é o bruto; a memória é o resumo que você lê primeiro.
+- **Resumo da semana:** toda segunda, o que cada grupo pediu e o que segue pendente.
+- **Áudio em texto:** transcrever os áudios dos grupos, para eles entrarem na leitura.
+- **Endereço com https** para a Evolution, se ainda estiver em `http://` (pede um domínio).
+
+## Quando algo dá errado
+
+**A mensagem de teste não aparece.** Vá na ordem:
+1. Supabase → Edge Functions → `receber-mensagem` → **Logs**. Nenhuma chamada no horário: o aviso não
+   está saindo da Evolution. Rode o comando da Etapa 5 de novo e veja se diz PRONTO; confira no painel
+   da Evolution se a instância está conectada e se "Ignorar grupos" está desligado (Etapa 3).
+2. Chamada com `401` e, nos Logs, a linha "o segredo do webhook não confere": o segredo do Supabase
+   (Etapa 4, passo 5) não é igual ao da Etapa 5. Copie o mesmo valor do gerenciador de senhas para os
+   dois lugares, sem espaço a mais.
+3. Linha "o WEBHOOK_SECRET não está cadastrado": falta o segredo da Etapa 4, passo 5.
+4. Chamada com `401` sem nenhuma dessas duas linhas: a verificação de JWT continua ligada (Etapa 4,
+   passo 6).
+5. Chamada com `500`: falta alguma tabela (os Logs dizem qual). Rode a Referência A de novo (pode
+   repetir sem problema).
+
+**Grupo sem nome** em `grupos` (o número já estava no grupo antes da Etapa 5, ou o grupo mudou de
+nome). Você mostra as últimas mensagens de cada grupo sem nome, para a pessoa reconhecer qual é:
+`select grupo_id, enviada_em, autor_nome, texto from conversas where grupo is null order by grupo_id, enviada_em desc limit 40;`
+Ela escreve o nome na coluna `nome` da tabela `grupos`, pelo Table Editor. Com a Evolution em https,
+os dois segredos opcionais da Etapa 4 fazem isso sozinhos.
+
+**Uma chave vazou** (foi colada num chat, num print, num e-mail):
+- **Segredo do webhook:** gere outro (Etapa 4, passo 3), troque o `WEBHOOK_SECRET` em Secrets e rode o
+  comando da Etapa 5 com o segredo novo.
+- **Chave da Evolution:** troque a AUTHENTICATION_API_KEY nas configurações do aplicativo Evolution, no
+  Gerenciador Docker da Hostinger (editar o aplicativo, mudar a variável, salvar e reiniciar). O número
+  continua conectado. Entre no painel com a chave nova e, se ela estiver nos Secrets do Supabase,
+  troque lá também.
+- **Senha do banco do Supabase:** Project Settings → Database → redefinir a senha.
+
+| O que acontece | O que costuma ser | O que fazer |
+|---|---|---|
+| Parou de chegar depois de mexer no painel da Evolution | A tela de Webhook foi salva e o segredo se perdeu | Rode o comando da Etapa 5 de novo |
+| A instância aparece conectada e nada chega | Conexão travada | Desconecte e conecte de novo pelo QR (Etapa 3) |
+| O conector da Etapa 6 não conecta | Login no Supabase não terminou, ou foi feito na organização errada | Remova o conector e adicione de novo, escolhendo a organização do projeto |
+| A IA diz que a tabela não existe, ou conta zero mensagens | O id do projeto no endereço do conector está errado | Refaça a ligação com o id certo |
+| A IA não usa o conector | Ele está desligado nesta conversa | Ligue pelo botão de ferramentas da caixa de mensagem, ou abra conversa nova |
+| O autor aparece como um código terminado em `@lid` | O WhatsApp esconde o telefone de algumas pessoas | Normal. O nome (`autor_nome`) continua certo |
+| Mensagem com texto vazio | Áudio, figurinha, ou edição que veio cifrada | Normal. A Referência C ensina a tratar cada caso |
+| O número caiu ou foi bloqueado | Risco da conexão fora da API oficial | Por isso o chip é separado. Reconecte; se bloqueou, outro chip e instância nova (e a Etapa 5 de novo) |
+| O projeto do Supabase pausou | O plano gratuito pausa depois de uma semana sem atividade | Restaure pelo painel. Grupo com movimento mantém o projeto acordado |
+
+Limites do plano gratuito do Supabase, para a pessoa saber: 500 MB de banco e 500 mil chamadas de
+função por mês. Para mensagens de texto, é bastante coisa.
+
+## Documentação oficial
+
+- Evolution API: https://docs.evolutionfoundation.com.br e https://github.com/evolution-foundation/evolution-api
+- Evolution na Hostinger: https://www.hostinger.com/br/applications/evolution-api
+- Supabase, função pelo painel: https://supabase.com/docs/guides/functions/quickstart-dashboard
+- Supabase, conector MCP: https://supabase.com/docs/guides/getting-started/mcp
+- Claude, conector personalizado: https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp
+
+---
+
+## Referência A: as tabelas (banco.sql)
+
+&lt;!-- arquivo: banco.sql --&gt;
+````sql
+-- Escuta de grupo: as tabelas que guardam as mensagens dos grupos.
+-- Rode tudo de uma vez no SQL Editor do Supabase.
+
+-- Os grupos em que o número de escuta está.
+create table if not exists public.grupos (
+  id text primary key,                    -- o código do grupo no WhatsApp (termina em @g.us)
+  nome text,                              -- o nome do grupo, como aparece no WhatsApp
+  atualizado_em timestamptz not null default now()
+);
+
+-- Uma linha por mensagem de grupo.
+create table if not exists public.mensagens (
+  id text primary key,                    -- o código da mensagem no WhatsApp; evita guardar repetida
+  grupo_id text not null,
+  autor_id text,                          -- quem mandou: telefone, ou um código terminado em @lid
+  autor_nome text,                        -- o nome que a pessoa usa no WhatsApp
+  de_mim boolean not null default false,  -- true quando quem mandou foi o próprio número de escuta
+  tipo text not null,                     -- texto, imagem, video, audio, documento, figurinha, reacao,
+                                          -- enquete, localizacao, contato, edicao, apagada, sistema, outro
+  texto text,                             -- o texto ou a legenda; vazio em áudio e figurinha
+  referencia_id text,                     -- a mensagem a que esta se refere (resposta, reação, edição, apagada)
+  enviada_em timestamptz not null,
+  recebida_em timestamptz not null default now(),
+  bruto jsonb                             -- o aviso inteiro da Evolution, pra reprocessar se precisar
+);
+
+create index if not exists mensagens_por_grupo_e_data on public.mensagens (grupo_id, enviada_em desc);
+
+-- Quem pediu pra não ter as mensagens registradas. A função confere esta
+-- lista antes de guardar cada mensagem. Uma linha por código da pessoa (ela
+-- pode ter dois: o telefone e um código terminado em @lid).
+create table if not exists public.nao_registrar (
+  autor_id text primary key,
+  nome text,
+  pedido_em timestamptz not null default now()
+);
+
+-- Porta fechada: só a função receber-mensagem (com a chave secreta) escreve,
+-- e ninguém de fora lê pela chave pública do projeto.
+alter table public.grupos enable row level security;
+alter table public.mensagens enable row level security;
+alter table public.nao_registrar enable row level security;
+revoke all on table public.grupos, public.mensagens, public.nao_registrar from anon, authenticated;
+
+-- A conversa pronta pra ler: mensagem com o nome do grupo.
+-- security_invoker faz a visão respeitar as mesmas travas das tabelas.
+create or replace view public.conversas
+with (security_invoker = true) as
+select
+  g.nome as grupo,
+  m.enviada_em,
+  m.autor_nome,
+  m.autor_id,
+  m.de_mim,
+  m.tipo,
+  m.texto,
+  m.referencia_id,
+  m.id,
+  m.grupo_id
+from public.mensagens m
+left join public.grupos g on g.id = m.grupo_id;
+
+revoke all on table public.conversas from anon, authenticated;
+````
+&lt;!-- fim --&gt;
+
+## Referência B: a função receber-mensagem (receber-mensagem.ts)
+
+&lt;!-- arquivo: receber-mensagem.ts --&gt;
+````ts
+// Função "receber-mensagem" (Supabase Edge Function).
+//
+// A Evolution API chama este endereço a cada novidade do número de escuta. A
+// função guarda só as mensagens de GRUPO (conversa privada com o número é
+// ignorada e não fica registrada) e o nome de cada grupo em que ele entra.
+// Quem está na tabela nao_registrar não tem as mensagens guardadas.
+//
+// Segredo que você cadastra em Edge Functions &gt; Secrets:
+//   WEBHOOK_SECRET     o mesmo valor do cabeçalho x-webhook-secret no webhook da Evolution
+// Opcionais, só se o endereço da sua Evolution começa com https:// (servem pra
+// pegar o nome de grupo antigo e de grupo renomeado):
+//   EVOLUTION_URL      ex.: https://evolution.seudominio.com.br
+//   EVOLUTION_API_KEY  a chave da Evolution
+// O endereço do banco e a chave secreta dele já existem dentro da função: você
+// não cadastra nem cola essa chave em lugar nenhum.
+
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const banco = createClient(Deno.env.get("SUPABASE_URL")!, chaveSecretaDoBanco(), {
+  auth: { persistSession: false },
+});
+
+// Projeto novo traz a chave em SUPABASE_SECRET_KEYS; projeto antigo, em
+// SUPABASE_SERVICE_ROLE_KEY. Serve qualquer um dos dois.
+function chaveSecretaDoBanco(): string {
+  try {
+    const nova = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}")?.default;
+    if (typeof nova === "string" &amp;&amp; nova) return nova;
+  } catch {
+    // formato inesperado: cai na chave antiga
+  }
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+}
+
+Deno.serve(async (req) =&gt; {
+  if (req.method !== "POST") return resposta(405, { erro: "use POST" });
+  if (!(await segredoConfere(req.headers.get("x-webhook-secret")))) {
+    return resposta(401, { erro: "segredo inválido" });
+  }
+
+  let aviso: Obj;
+  try {
+    aviso = await req.json();
+  } catch {
+    return resposta(400, { erro: "o corpo não é JSON" });
+  }
+
+  if (nomeDoEvento(aviso) === "groups.upsert") {
+    await guardarGruposDoAviso(aviso.data);
+    return resposta(200, { ok: true });
+  }
+
+  const linha = montarLinha(aviso);
+  if (!linha) return resposta(200, { ok: true, ignorada: true });
+
+  // Quem pediu pra não ser registrado não entra no banco. Se a lista não
+  // responde, a mensagem também não entra: na dúvida, vale o pedido da pessoa.
+  try {
+    if (await pediuParaNaoRegistrar(idsDoAutor(aviso))) return resposta(200, { ok: true, ignorada: true });
+  } catch (e) {
+    console.error("não deu pra conferir a lista nao_registrar:", (e as Error).message);
+    return resposta(500, { erro: "falha ao conferir a lista nao_registrar" });
+  }
+
+  // A Evolution pode mandar o mesmo aviso duas vezes: o id da mensagem é a
+  // chave, e a repetida é descartada sem erro.
+  const { error } = await banco
+    .from("mensagens")
+    .upsert(linha, { onConflict: "id", ignoreDuplicates: true });
+  if (error) {
+    console.error("falha ao gravar a mensagem:", error.message);
+    return resposta(500, { erro: "falha ao gravar" });
+  }
+
+  await guardarNomeDoGrupo(String(aviso.instance ?? ""), linha.grupo_id);
+  return resposta(200, { ok: true });
+});
+
+// deno-lint-ignore no-explicit-any
+type Obj = Record&lt;string, any&gt;;
+
+// O WhatsApp embrulha a mensagem em "envelopes" (mensagem temporária, ver uma
+// vez, documento com legenda, cada foto de um álbum...). O conteúdo de verdade
+// fica lá dentro; sem abrir, a legenda de uma foto de álbum vira texto vazio.
+const ENVELOPES = [
+  "ephemeralMessage",
+  "viewOnceMessage",
+  "viewOnceMessageV2",
+  "viewOnceMessageV2Extension",
+  "documentWithCaptionMessage",
+  "associatedChildMessage",
+  "editedMessage",
+  "deviceSentMessage",
+];
+
+function desembrulhar(mensagem: Obj): Obj {
+  let m = mensagem;
+  for (let i = 0; i &lt; 6 &amp;&amp; m &amp;&amp; typeof m === "object"; i++) {
+    const envelope = ENVELOPES.find((k) =&gt; m[k]?.message);
+    if (!envelope) break;
+    m = m[envelope].message;
+  }
+  return m ?? {};
+}
+
+// O evento chega como "messages.upsert" ou como "MESSAGES_UPSERT".
+function nomeDoEvento(aviso: Obj): string {
+  return String(aviso?.event ?? "").toLowerCase().replaceAll("_", ".");
+}
+
+function montarLinha(aviso: Obj) {
+  if (nomeDoEvento(aviso) !== "messages.upsert") return null;
+
+  const dados = aviso.data ?? {};
+  const chave = dados.key ?? {};
+  const grupoId = chave.remoteJid;
+  // Grupo do WhatsApp termina em @g.us. Conversa privada, status e canal ficam de fora.
+  if (typeof grupoId !== "string" || !grupoId.endsWith("@g.us")) return null;
+  if (typeof chave.id !== "string" || !chave.id) return null;
+
+  const conteudo = lerConteudo(desembrulhar(dados.message ?? {}));
+  const deMim = chave.fromMe === true;
+
+  return {
+    id: chave.id,
+    grupo_id: grupoId,
+    // O WhatsApp passou a esconder o telefone atrás de um código que termina em
+    // @lid. Quando a Evolution traz o telefone no campo "Alt", ele vale mais.
+    autor_id: chave.participantAlt ?? chave.participant ?? null,
+    // Na mensagem mandada pelo próprio número, o pushName é o nome DELE.
+    autor_nome: deMim ? null : (String(dados.pushName ?? "").trim() || null),
+    de_mim: deMim,
+    tipo: conteudo.tipo,
+    texto: conteudo.texto,
+    referencia_id: conteudo.referenciaId,
+    enviada_em: quando(dados.messageTimestamp, aviso.date_time),
+    bruto: semChaves(aviso),
+  };
+}
+
+// A mesma pessoa pode vir pelo telefone ou pelo código @lid: os dois contam.
+function idsDoAutor(aviso: Obj): string[] {
+  const chave = aviso?.data?.key ?? {};
+  return [chave.participant, chave.participantAlt].filter((id) =&gt; typeof id === "string" &amp;&amp; id);
+}
+
+async function pediuParaNaoRegistrar(ids: string[]): Promise&lt;boolean&gt; {
+  if (!ids.length) return false;
+  const { data, error } = await banco.from("nao_registrar").select("autor_id").in("autor_id", ids).limit(1);
+  if (error) throw new Error(error.message);
+  return (data ?? []).length &gt; 0;
+}
+
+type Conteudo = { tipo: string; texto: string | null; referenciaId: string | null };
+
+function lerConteudo(m: Obj): Conteudo {
+  // Mensagem citada (a pessoa respondeu "em cima" de outra): guarda o id da original.
+  const citada = Object.values(m).find((v) =&gt; v?.contextInfo?.stanzaId)?.contextInfo?.stanzaId ?? null;
+  const c = (tipo: string, texto: unknown): Conteudo =&gt; ({
+    tipo,
+    texto: typeof texto === "string" &amp;&amp; texto.trim() ? texto : null,
+    referenciaId: citada,
+  });
+
+  // Edição de mensagem em grupo costuma vir cifrada: fica registrado que houve
+  // edição, mas o texto novo não vem legível.
+  const cifrada = m.secretEncryptedMessage;
+  if (cifrada) {
+    const edicao = cifrada.secretEncType === 2 || cifrada.secretEncType === "MESSAGE_EDIT";
+    return { tipo: edicao ? "edicao" : "outro", texto: null, referenciaId: cifrada.targetMessageKey?.id ?? null };
+  }
+  const protocolo = m.protocolMessage;
+  if (protocolo) {
+    if (protocolo.type === 14 || protocolo.type === "MESSAGE_EDIT") {
+      const nova = lerConteudo(desembrulhar(protocolo.editedMessage ?? {}));
+      return { tipo: "edicao", texto: nova.texto, referenciaId: protocolo.key?.id ?? null };
+    }
+    if (protocolo.type === 0 || protocolo.type === "REVOKE") {
+      return { tipo: "apagada", texto: null, referenciaId: protocolo.key?.id ?? null };
+    }
+    return { tipo: "sistema", texto: null, referenciaId: null };
+  }
+
+  if (typeof m.conversation === "string") return c("texto", m.conversation);
+  if (m.extendedTextMessage) return c("texto", m.extendedTextMessage.text);
+  if (m.imageMessage) return c("imagem", m.imageMessage.caption);
+  if (m.videoMessage) return c("video", m.videoMessage.caption);
+  if (m.audioMessage) return c("audio", null);
+  if (m.documentMessage) {
+    const doc = m.documentMessage;
+    return c("documento", [doc.fileName, doc.caption].filter(Boolean).join(": "));
+  }
+  if (m.stickerMessage || m.lottieStickerMessage) return c("figurinha", null);
+  if (m.reactionMessage) {
+    return { tipo: "reacao", texto: m.reactionMessage.text || null, referenciaId: m.reactionMessage.key?.id ?? null };
+  }
+  const enquete = m.pollCreationMessage ?? m.pollCreationMessageV2 ?? m.pollCreationMessageV3;
+  if (enquete) {
+    const opcoes = (enquete.options ?? []).map((o: Obj) =&gt; `- ${o.optionName}`);
+    return c("enquete", [enquete.name, ...opcoes].filter(Boolean).join("\n"));
+  }
+  const local = m.locationMessage ?? m.liveLocationMessage;
+  if (local) return c("localizacao", [local.name, local.address].filter(Boolean).join(", "));
+  if (m.contactMessage) return c("contato", m.contactMessage.displayName);
+  return c("outro", null);
+}
+
+// A hora vem em segundos, às vezes como texto, às vezes como {low, high}.
+function quando(ts: unknown, reserva: unknown): string {
+  const segundos = ts &amp;&amp; typeof ts === "object" ? Number((ts as Obj).low) : Number(ts);
+  if (Number.isFinite(segundos) &amp;&amp; segundos &gt; 0) return new Date(segundos * 1000).toISOString();
+  const r = Date.parse(String(reserva ?? ""));
+  return new Date(Number.isFinite(r) ? r : Date.now()).toISOString();
+}
+
+// O aviso da Evolution pode trazer a chave da instância no campo "apikey". Ela
+// controla o seu número, então nunca entra no banco que a IA lê. O texto citado
+// numa resposta também sai: a original já está guardada (referencia_id), e uma
+// cópia aqui sobreviveria ao pedido de não registro de quem foi citado.
+function semChaves(aviso: Obj): Obj {
+  const { apikey: _chave, ...resto } = aviso;
+  return semCitacao(resto) as Obj;
+}
+
+function semCitacao(valor: unknown): unknown {
+  if (Array.isArray(valor)) return valor.map(semCitacao);
+  if (!valor || typeof valor !== "object") return valor;
+  return Object.fromEntries(
+    Object.entries(valor).filter(([k]) =&gt; k !== "quotedMessage").map(([k, v]) =&gt; [k, semCitacao(v)]),
+  );
+}
+
+// Quando o número entra num grupo, a Evolution avisa com o nome dele.
+async function guardarGruposDoAviso(dados: unknown) {
+  const lista = (Array.isArray(dados) ? dados : [dados]) as Obj[];
+  const agora = new Date().toISOString();
+  const linhas = lista
+    .filter((g) =&gt; typeof g?.id === "string" &amp;&amp; g.id.endsWith("@g.us"))
+    .filter((g) =&gt; typeof g.subject === "string" &amp;&amp; g.subject.trim())
+    .map((g) =&gt; ({ id: g.id, nome: g.subject.trim(), atualizado_em: agora }));
+  if (!linhas.length) return;
+  const { error } = await banco.from("grupos").upsert(linhas, { onConflict: "id" });
+  if (error) console.error("falha ao gravar o nome do grupo:", error.message);
+}
+
+// A mensagem não traz o nome do grupo. Grupo novo entra na lista na primeira
+// mensagem; o nome vem do aviso de entrada no grupo (acima) ou, se a Evolution
+// estiver em https, de uma pergunta a ela, uma vez por dia (pega renomeação).
+async function guardarNomeDoGrupo(instancia: string, grupoId: string) {
+  try {
+    const { data } = await banco.from("grupos").select("nome, atualizado_em").eq("id", grupoId).maybeSingle();
+    const umDia = 24 * 60 * 60 * 1000;
+    if (data?.nome &amp;&amp; Date.now() - Date.parse(data.atualizado_em) &lt; umDia) return;
+    const nome = await buscarNomeNaEvolution(instancia, grupoId);
+    if (nome) {
+      await banco.from("grupos").upsert({ id: grupoId, nome, atualizado_em: new Date().toISOString() });
+    } else if (!data) {
+      await banco.from("grupos").upsert(
+        { id: grupoId, nome: null, atualizado_em: new Date().toISOString() },
+        { onConflict: "id", ignoreDuplicates: true },
+      );
+    }
+  } catch (e) {
+    // Nome é conforto: a mensagem já está gravada, e a próxima tenta de novo.
+    console.error("não deu pra buscar o nome do grupo:", (e as Error).message);
+  }
+}
+
+async function buscarNomeNaEvolution(instancia: string, grupoId: string): Promise&lt;string | null&gt; {
+  const url = (Deno.env.get("EVOLUTION_URL") ?? "").replace(/\/+$/, "");
+  const chave = Deno.env.get("EVOLUTION_API_KEY") ?? "";
+  if (!url || !chave || !instancia) return null;
+  // A chave da Evolution só viaja com criptografia (https). O http só vale
+  // dentro do próprio computador, em teste.
+  const seguro = url.startsWith("https://") || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(url);
+  if (!seguro) {
+    console.warn("EVOLUTION_URL sem https: o nome do grupo não é buscado, pra chave não viajar aberta");
+    return null;
+  }
+  const res = await fetch(
+    `${url}/group/findGroupInfos/${encodeURIComponent(instancia)}?groupJid=${encodeURIComponent(grupoId)}`,
+    { headers: { apikey: chave }, signal: AbortSignal.timeout(8000) },
+  );
+  if (!res.ok) return null;
+  const nome = (await res.json())?.subject;
+  return typeof nome === "string" &amp;&amp; nome.trim() ? nome.trim() : null;
+}
+
+// Compara o segredo sem vazar, pelo tempo de resposta, quantas letras acertou.
+// Espaço e quebra de linha nas pontas (comuns ao copiar e colar) não contam.
+// Sem segredo configurado, recusa tudo. A recusa fica escrita nos Logs da
+// função (sem o segredo), pra separar "segredo errado" de "JWT ligado".
+async function segredoConfere(cabecalho: string | null): Promise&lt;boolean&gt; {
+  const esperado = (Deno.env.get("WEBHOOK_SECRET") ?? "").trim();
+  const recebido = (cabecalho ?? "").trim();
+  if (!esperado) {
+    console.warn("recusado: o WEBHOOK_SECRET não está cadastrado nos Secrets da função");
+    return false;
+  }
+  const [a, b] = await Promise.all([resumo(esperado), resumo(recebido)]);
+  let diferenca = 0;
+  for (let i = 0; i &lt; a.length; i++) diferenca |= a[i] ^ b[i];
+  if (diferenca !== 0 || !recebido) {
+    console.warn("recusado: o segredo do webhook não confere com o WEBHOOK_SECRET");
+    return false;
+  }
+  return true;
+}
+
+async function resumo(texto: string): Promise&lt;Uint8Array&gt; {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(texto)));
+}
+
+function resposta(status: number, corpo: Obj): Response {
+  return new Response(JSON.stringify(corpo), { status, headers: { "Content-Type": "application/json" } });
+}
+````
+&lt;!-- fim --&gt;
+
+## Referência C: o modelo do arquivo de instruções (instrucoes-da-ia.md)
+
+&lt;!-- arquivo: instrucoes-da-ia.md --&gt;
+````markdown
+# Como ler os grupos de WhatsApp dos meus clientes
+
+As mensagens dos grupos de WhatsApp com os meus clientes ficam no meu banco Supabase, no projeto
+**[NOME DO PROJETO]**, que você acessa só para leitura. Use isso sempre que eu falar de um cliente,
+de um grupo ou de algo que "pediram no WhatsApp".
+
+## Onde está cada coisa
+
+- **`conversas`** é a visão pronta para ler: uma linha por mensagem, já com o nome do grupo.
+  Colunas: `grupo` (nome), `enviada_em`, `autor_nome`, `autor_id`, `de_mim`, `tipo`, `texto`,
+  `referencia_id`, `id`, `grupo_id`.
+- **`grupos`** tem o código e o nome de cada grupo.
+- `enviada_em` está em UTC. Eu estou no fuso **[America/Sao_Paulo]**: converta ao mostrar.
+- `tipo` diz o que é a mensagem: texto, imagem, video, audio, documento, figurinha, reacao, enquete,
+  localizacao, contato, edicao, apagada, sistema ou outro. Em imagem, vídeo e documento, `texto` é a
+  legenda (ou o nome do arquivo).
+- `referencia_id` aponta para outra mensagem (`id`): a que foi respondida, reagida, editada ou apagada.
+
+## Quem é quem
+
+- Da minha equipe, nos grupos: **[nomes como aparecem no WhatsApp]**. Para ver quem fala nos grupos:
+  `select autor_nome, count(*) from conversas group by autor_nome order by 2 desc;`
+- `de_mim = true` é o próprio número de escuta (ele não costuma falar).
+- Quem não é da equipe é do lado do cliente.
+
+## Quando eu citar um cliente ou um grupo
+
+1. **Ache o grupo** pelo nome:
+   `select distinct grupo, grupo_id from conversas where grupo ilike '%[parte do nome]%';`
+   Achou mais de um, me mostre e pergunte qual. Não achou nenhum, me diga e liste os grupos que existem.
+2. **Leia as últimas mensagens atravessando dias**, não só as de hoje (grupo quieto hoje não quer dizer
+   que não tem pendência):
+   `select enviada_em, autor_nome, tipo, texto, id, referencia_id from conversas where grupo_id = '[código]' order by enviada_em desc limit 80;`
+   Leia de baixo para cima, na ordem da conversa. Se o assunto começou antes, busque mais para trás.
+3. **Monte o quadro antes de responder:** o que o cliente pediu, o que a equipe respondeu ou prometeu
+   (com prazo, se houver), o que ficou pendente e o que mudou de ideia no caminho.
+4. **Responda citando data e quem disse.** O que não está nas mensagens, diga que não está.
+
+Para um assunto específico, procure pela palavra:
+`select enviada_em, grupo, autor_nome, texto from conversas where texto ilike '%[palavra]%' order by enviada_em desc limit 30;`
+
+## Cuidados ao ler
+
+- **Áudio** aparece como `tipo = audio`, sem texto. Diga que existe um áudio naquele ponto e que você
+  não sabe o que ele diz.
+- **Edição** (`tipo = edicao`) com texto vazio quer dizer que a pessoa editou a mensagem e o texto novo
+  não veio. Avise quando isso pesar na resposta.
+- **Mensagem apagada** (`tipo = apagada`): a original pode ter deixado de valer.
+- **Reação** (`tipo = reacao`) é um emoji em cima de outra mensagem; um 👍 do cliente costuma ser aceite.
+- **Antes de escrever uma mensagem para o cliente, releia o grupo na hora.** A última mensagem pode ser
+  de cinco minutos atrás, e a resposta tem que continuar a conversa real.
+
+## Quando alguém pedir para não ser registrado
+
+1. **Ache os códigos da pessoa** (podem ser dois, o telefone e um código `@lid`):
+   `select distinct autor_id, bruto-&gt;'data'-&gt;'key'-&gt;&gt;'participant' as outro_codigo from mensagens where autor_nome ilike '%[nome]%';`
+   Sem mensagem dela no banco, ou com outro nome no WhatsApp, use o telefone: `55` + DDD + número +
+   `@s.whatsapp.net`, nas duas formas, com e sem o 9 depois do DDD (o WhatsApp às vezes guarda o
+   celular sem ele). Ex.: `5541999998888@s.whatsapp.net` e `554199998888@s.whatsapp.net`.
+2. **Nesta ordem**, me passe para eu rodar no SQL Editor: primeiro uma linha destas para cada código
+   (daí em diante nada novo dela entra),
+   `insert into public.nao_registrar (autor_id, nome) values ('[código]', '[nome]') on conflict do nothing;`
+   e depois esta, que apaga o que já foi guardado:
+   `delete from public.mensagens where autor_id in (select autor_id from public.nao_registrar) or bruto-&gt;'data'-&gt;'key'-&gt;&gt;'participant' in (select autor_id from public.nao_registrar);`
+3. **Confira** que não sobrou nada (tem que dar 0):
+   `select count(*) from mensagens where autor_id in (select autor_id from nao_registrar) or bruto-&gt;'data'-&gt;'key'-&gt;&gt;'participant' in (select autor_id from nao_registrar);`
+4. Sugira a resposta para a pessoa: "Pronto, você saiu do registro, e o que já estava guardado foi
+   apagado."
+
+## O que fica fora das respostas
+
+- Senha, login, número de cartão ou documento que alguém tenha colado no grupo: nunca repita.
+- O telefone das pessoas (`autor_id`): só mostre se eu pedir.
+- Você só lê. Para mudar alguma coisa no banco, me diga e eu faço.
+````
+&lt;!-- fim --&gt;
+</textarea>
+<!-- fim do guia -->
+
+<script>
+  const botao = document.getElementById("copiar");
+  const aviso = document.getElementById("aviso");
+  const guia = document.getElementById("guia");
+  botao.addEventListener("click", async () => {
+    const texto = guia.value;
+    let copiou = false;
+    try {
+      await navigator.clipboard.writeText(texto);
+      copiou = true;
+    } catch {
+      guia.select();
+      copiou = document.execCommand("copy");
+    }
+    aviso.textContent = copiou
+      ? "Copiado. Agora cola numa conversa nova com a sua IA."
+      : "Não deu pra copiar por aqui. Abra no computador e tente de novo.";
+  });
+</script>
+</body>
+</html>
