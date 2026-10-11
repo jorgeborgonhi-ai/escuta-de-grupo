@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<!-- A imagem de prévia do link (capa.png, 1200x630). Pra refazer:
+     Chrome headless com --window-size=1200,630 --screenshot apontando pra este arquivo. -->
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@700&family=Space+Grotesk:wght@500;700&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #111317;
+    color: #F2EFE8;
+    font-family: "Space Grotesk", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 88px;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .rotulo { font: 700 22px/1 "JetBrains Mono", monospace; letter-spacing: .1em; color: #8A8780; text-transform: uppercase; }
+  h1 { font-size: 84px; line-height: 1.02; letter-spacing: -.025em; margin: 26px 0 30px; font-weight: 700; max-width: 900px; }
+  h1 em { font: italic 400 1.1em/1 "Instrument Serif", serif; color: #7ED321; }
+  .sub { font-size: 30px; font-weight: 500; color: #B5B1A8; }
+  .barra { position: absolute; left: 0; top: 0; bottom: 0; width: 18px; background: #7ED321; }
+  .bolhas { position: absolute; right: 80px; top: 64px; display: flex; flex-direction: column; gap: 14px; align-items: flex-end; opacity: .9; }
+  .bolha { background: #1B1E23; border: 2px solid #2A2E35; border-radius: 18px; padding: 12px 18px; font-size: 20px; color: #B5B1A8; }
+  .selo { font: 700 16px/1 "JetBrains Mono", monospace; color: #7ED321; letter-spacing: .04em; padding-right: 6px; }
+</style>
+</head>
+<body>
+  <div class="barra"></div>
+  <div class="bolhas">
+    <div class="bolha">pode mudar a cor do logo até sexta?</div>
+    <div class="selo">guardado no banco · a IA já sabe</div>
+  </div>
+  <div class="rotulo">Guia · @jorgeborgonhi</div>
+  <h1>A sua IA lendo o <em>grupo</em> do cliente</h1>
+  <div class="sub">Copie o guia, cole na sua IA, e ela monta com você.</div>
+</body>
+</html>
